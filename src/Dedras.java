@@ -6,6 +6,7 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 
+import java.io.*;
 import java.util.ArrayList;
 
 public class Dedras extends Application {
@@ -30,7 +31,7 @@ public class Dedras extends Application {
         personDetailsArea.setEditable(false);
 
         // Заполнение списка людей
-        personListView.getItems().addAll(people);
+        updatePersonList();
 
         // Обработчик выбора человека из списка
         personListView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
@@ -66,10 +67,16 @@ public class Dedras extends Application {
         MenuBar menuBar = new MenuBar();
 
         Menu fileMenu = new Menu("File");
-        Menu statisticsMenu = new Menu("Statistics");
-        Menu helpMenu = new Menu("Help");
 
-        menuBar.getMenus().addAll(fileMenu, statisticsMenu, helpMenu);
+        MenuItem saveMenuItem = new MenuItem("Save");
+        saveMenuItem.setOnAction(e -> savePeopleToFile());
+
+        MenuItem loadMenuItem = new MenuItem("Load");
+        loadMenuItem.setOnAction(e -> loadPeopleFromFile());
+
+        fileMenu.getItems().addAll(saveMenuItem, loadMenuItem);
+
+        menuBar.getMenus().addAll(fileMenu);
 
         // Размещение элементов в панели
         VBox leftPanel = new VBox(personListView, newButton, editButton, deleteButton);
@@ -148,6 +155,36 @@ public class Dedras extends Application {
         Scene dialogScene = new Scene(dialogPane, 300, 400);
         dialogStage.setScene(dialogScene);
         dialogStage.showAndWait(); // Ожидание закрытия окна перед продолжением выполнения кода
+    }
+
+    private void savePeopleToFile() {
+        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("people.dat"))) {
+            oos.writeObject(people);
+            System.out.println("Data saved successfully.");
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Error saving data: " + e.getMessage());
+        }
+    }
+
+    private void loadPeopleFromFile() {
+        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("people.dat"))) {
+            people.clear(); // Очистка текущего списка перед загрузкой новых данных
+            people.addAll((ArrayList<Person>) ois.readObject());
+            updatePersonList();
+            System.out.println("Data loaded successfully.");
+        } catch (IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+            showAlert("Error loading data: " + e.getMessage());
+        }
+    }
+
+    private void showAlert(String message) {
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Error");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     public static void main(String[] args) {

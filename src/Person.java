@@ -1,12 +1,15 @@
-public class Person {
-    public String firstName;
-    public String lastName;
-    public String street;
-    public String city;
-    public String postalCode;
-    public String birthday;
+import java.io.Serializable;
 
-    // Конструктор
+public class Person implements Serializable {
+    private static final long serialVersionUID = 1L; // Рекомендуется добавить это поле
+
+    String firstName;
+    String lastName;
+    String street;
+    String city;
+    String postalCode;
+    String birthday;
+
     public Person(String firstName, String lastName, String street, String city, String postalCode, String birthday) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -16,7 +19,6 @@ public class Person {
         this.birthday = birthday;
     }
 
-    // Геттеры
     public String getFirstName() { return firstName; }
     public String getLastName() { return lastName; }
     public String getStreet() { return street; }
