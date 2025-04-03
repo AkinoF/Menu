@@ -1,10 +1,10 @@
 public class Person {
-    private String firstName;
-    private String lastName;
-    private String street;
-    private String city;
-    private String postalCode;
-    private String birthday;
+    public String firstName;
+    public String lastName;
+    public String street;
+    public String city;
+    public String postalCode;
+    public String birthday;
 
     // Конструктор
     public Person(String firstName, String lastName, String street, String city, String postalCode, String birthday) {
