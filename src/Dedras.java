@@ -42,17 +42,10 @@ public class Dedras extends Application {
 
         // Создание кнопок
         Button newButton = new Button("New");
-        Button editButton = new Button("Edit");
         Button deleteButton = new Button("Delete");
+        Button editButton = new Button("Edit"); // Кнопка Edit
 
         newButton.setOnAction(e -> showPersonDialog(null));
-
-        editButton.setOnAction(e -> {
-            Person selectedPerson = personListView.getSelectionModel().getSelectedItem();
-            if (selectedPerson != null) {
-                showPersonDialog(selectedPerson);
-            }
-        });
 
         deleteButton.setOnAction(e -> {
             Person selectedPerson = personListView.getSelectionModel().getSelectedItem();
@@ -60,6 +53,13 @@ public class Dedras extends Application {
                 people.remove(selectedPerson);
                 updatePersonList();
                 personDetailsArea.clear();
+            }
+        });
+
+        editButton.setOnAction(e -> {
+            Person selectedPerson = personListView.getSelectionModel().getSelectedItem();
+            if (selectedPerson != null) {
+                showPersonDialog(selectedPerson);
             }
         });
 
@@ -76,10 +76,30 @@ public class Dedras extends Application {
 
         fileMenu.getItems().addAll(saveMenuItem, loadMenuItem);
 
-        menuBar.getMenus().addAll(fileMenu);
+        Menu helpMenu = new Menu("Help");
+
+        MenuItem helpMenuItem = new MenuItem("Help");
+        helpMenuItem.setOnAction(e -> showHelpDialog());
+
+        helpMenu.getItems().add(helpMenuItem);
+
+        // Добавляем кнопку Edit в основное меню
+        Menu editMenu = new Menu("Edit");
+
+        MenuItem editMenuItem = new MenuItem("Edit");
+        editMenuItem.setOnAction(e -> {
+            Person selectedPerson = personListView.getSelectionModel().getSelectedItem();
+            if (selectedPerson != null) {
+                showPersonDialog(selectedPerson);
+            }
+        });
+
+        editMenu.getItems().add(editMenuItem);
+
+        menuBar.getMenus().addAll(fileMenu, editMenu, helpMenu);
 
         // Размещение элементов в панели
-        VBox leftPanel = new VBox(personListView, newButton, editButton, deleteButton);
+        VBox leftPanel = new VBox(personListView, newButton, editButton, deleteButton); // Добавляем кнопку Edit вниз
 
         BorderPane root = new BorderPane();
         root.setTop(menuBar);
@@ -90,6 +110,29 @@ public class Dedras extends Application {
 
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+
+    private void showHelpDialog() {
+        Stage helpStage = new Stage();
+        helpStage.initModality(Modality.APPLICATION_MODAL);
+        helpStage.setTitle("Help");
+
+        TextArea helpTextArea = new TextArea();
+        helpTextArea.setEditable(false);
+        helpTextArea.setText(
+                "Добро пожаловать приложение по слежке людей для FBI.\n\n" +
+                        "- Используя кнопку 'New' даёт вам добавить нового человека в базу данных.\n" +
+                        "- Выбирая человека из списка и нажимая кнопку 'Edit' даёт изменить их информацию.\n" +
+                        "- Используйте кнопку 'Delete' чтобы удалить информацию о человеке из базы данных.\n" +
+                        "- Save и Load функции которые находяться в кнопке File. Даёт вам сохранить ваши изменения и загрузить их."
+        );
+
+        VBox dialogPane = new VBox(10);
+        dialogPane.getChildren().addAll(helpTextArea);
+
+        Scene dialogScene = new Scene(dialogPane, 400, 300);
+        helpStage.setScene(dialogScene);
+        helpStage.showAndWait(); // Ожидание закрытия окна перед продолжением выполнения кода
     }
 
     private void showPersonDetails(Person person) {

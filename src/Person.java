@@ -1,8 +1,6 @@
 import java.io.Serializable;
 
 public class Person implements Serializable {
-    private static final long serialVersionUID = 1L; // Рекомендуется добавить это поле
-
     String firstName;
     String lastName;
     String street;
