@@ -5,8 +5,13 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 
 import java.io.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 
 public class Dedras extends Application {
@@ -24,6 +29,7 @@ public class Dedras extends Application {
         people = new ArrayList<>();
         people.add(new Person("John", "Doe", "123 Main St", "Springfield", "12345", "01/01/1990"));
         people.add(new Person("Jane", "Smith", "456 Elm St", "Springfield", "12345", "02/02/1992"));
+        // Добавьте больше тестовых данных с разными датами рождения
 
         // Создание элементов интерфейса
         personListView = new ListView<>();
@@ -43,7 +49,7 @@ public class Dedras extends Application {
         // Создание кнопок
         Button newButton = new Button("New");
         Button deleteButton = new Button("Delete");
-        Button editButton = new Button("Edit"); // Кнопка Edit
+        Button editButton = new Button("Edit");
 
         newButton.setOnAction(e -> showPersonDialog(null));
 
@@ -83,23 +89,19 @@ public class Dedras extends Application {
 
         helpMenu.getItems().add(helpMenuItem);
 
-        // Добавляем кнопку Edit в основное меню
-        Menu editMenu = new Menu("Edit");
+        // Добавляем кнопку Statistics в основное меню
+        Menu statisticsMenu = new Menu("Statistics");
 
-        MenuItem editMenuItem = new MenuItem("Edit");
-        editMenuItem.setOnAction(e -> {
-            Person selectedPerson = personListView.getSelectionModel().getSelectedItem();
-            if (selectedPerson != null) {
-                showPersonDialog(selectedPerson);
-            }
-        });
+        MenuItem statisticsMenuItem = new MenuItem("Show Birthdays This Month");
 
-        editMenu.getItems().add(editMenuItem);
+        statisticsMenuItem.setOnAction(e -> showBirthdayStatistics());
 
-        menuBar.getMenus().addAll(fileMenu, editMenu, helpMenu);
+        statisticsMenu.getItems().add(statisticsMenuItem);
+
+        menuBar.getMenus().addAll(fileMenu, statisticsMenu, helpMenu);
 
         // Размещение элементов в панели
-        VBox leftPanel = new VBox(personListView, newButton, editButton, deleteButton); // Добавляем кнопку Edit вниз
+        VBox leftPanel = new VBox(personListView, newButton, editButton, deleteButton);
 
         BorderPane root = new BorderPane();
         root.setTop(menuBar);
@@ -110,6 +112,20 @@ public class Dedras extends Application {
 
         primaryStage.setScene(scene);
         primaryStage.show();
+    }
+
+    private void showBirthdayStatistics() {
+        int[] birthdayCounts = new int[31]; // Массив для хранения количества дней рождения по дням месяца
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yyyy");
+
+        for (Person person : people) {
+            LocalDate birthdayDate = LocalDate.parse(person.getBirthday(), formatter);
+            if (birthdayDate.getMonthValue() == LocalDate.now().getMonthValue()) {
+                birthdayCounts[birthdayDate.getDayOfMonth() - 1]++;
+            }
+        }
+        
     }
 
     private void showHelpDialog() {
@@ -132,7 +148,7 @@ public class Dedras extends Application {
 
         Scene dialogScene = new Scene(dialogPane, 400, 300);
         helpStage.setScene(dialogScene);
-        helpStage.showAndWait(); // Ожидание закрытия окна перед продолжением выполнения кода
+        helpStage.showAndWait();
     }
 
     private void showPersonDetails(Person person) {
@@ -153,12 +169,10 @@ public class Dedras extends Application {
 
     private void showPersonDialog(Person person) {
 
-        // Создаем новое окно
         Stage dialogStage = new Stage();
         dialogStage.initModality(Modality.APPLICATION_MODAL);
         dialogStage.setTitle(person == null ? "Add Person" : "Edit Person");
 
-        // Поля для ввода данных
         TextField firstNameField = new TextField(person != null ? person.getFirstName() : "");
         TextField lastNameField = new TextField(person != null ? person.getLastName() : "");
         TextField streetField = new TextField(person != null ? person.getStreet() : "");
@@ -178,16 +192,16 @@ public class Dedras extends Application {
 
         Button saveButton = new Button("Save");
         saveButton.setOnAction(e -> {
-            if (person == null) { // Добавление нового человека
+            if (person == null) {
                 people.add(new Person(firstNameField.getText(), lastNameField.getText(), streetField.getText(),
                         cityField.getText(), postalCodeField.getText(), birthdayField.getText()));
-            } else { // Редактирование существующего человека
-                person.firstName = firstNameField.getText();  // Изменение полей напрямую для редактирования
+            } else {
+                person.firstName = firstNameField.getText();
                 person.lastName = lastNameField.getText();
                 person.street = streetField.getText();
                 person.city = cityField.getText();
                 person.postalCode = postalCodeField.getText();
-                person.birthday = birthdayField.getText();
+                person.birthday= birthdayField .getText();
             }
             updatePersonList();
             dialogStage.close();
@@ -195,42 +209,42 @@ public class Dedras extends Application {
 
         dialogPane.getChildren().add(saveButton);
 
-        Scene dialogScene = new Scene(dialogPane, 300, 400);
-        dialogStage.setScene(dialogScene);
-        dialogStage.showAndWait(); // Ожидание закрытия окна перед продолжением выполнения кода
+        Scene dialogScene= 	new Scene(dialogPane ,300 ,400 );
+        dialogStage .setScene(dialogScene );
+        dialogStage .showAndWait();
     }
 
     private void savePeopleToFile() {
-        try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("people.dat"))) {
-            oos.writeObject(people);
-            System.out.println("Data saved successfully.");
+        try (ObjectOutputStream oos=	new ObjectOutputStream(new FileOutputStream ("people.dat"))) {
+            oos.writeObject(people );
+            System.out.println ("Data saved successfully.");
         } catch (IOException e) {
-            e.printStackTrace();
-            showAlert("Error saving data: " + e.getMessage());
+            e.printStackTrace ();
+            showAlert ("Error saving data: "+ e .getMessage());
         }
     }
 
-    private void loadPeopleFromFile() {
-        try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream("people.dat"))) {
-            people.clear(); // Очистка текущего списка перед загрузкой новых данных
+    private void loadPeopleFromFile () {
+        try (ObjectInputStream ois=	new ObjectInputStream(new FileInputStream ("people.dat"))) {
+            people.clear ();
             people.addAll((ArrayList<Person>) ois.readObject());
-            updatePersonList();
-            System.out.println("Data loaded successfully.");
+            updatePersonList ();
+            System.out.println ("Data loaded successfully.");
         } catch (IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-            showAlert("Error loading data: " + e.getMessage());
+            e.printStackTrace ();
+            showAlert ("Error loading data: "+ e .getMessage());
         }
     }
 
     private void showAlert(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Error");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        Alert alert=	new Alert(Alert.AlertType.ERROR );
+        alert .setTitle ("Error ");
+        alert .setHeaderText(null );
+        alert .setContentText(message );
+        alert .showAndWait ();
     }
 
     public static void main(String[] args) {
-        launch(args);
+        launch(args );
     }
 }
